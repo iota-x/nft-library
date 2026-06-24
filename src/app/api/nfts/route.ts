@@ -9,7 +9,11 @@ interface NFT {
 }
 
 interface HeliusNFTResponse {
-  result: {
+  error?: {
+    code: number;
+    message: string;
+  };
+  result?: {
     items: Array<{
       id: string;
       content: {
@@ -35,6 +39,9 @@ type Data = {
 
 async function fetchNonFungibleAssetsByOwner(address: string, page: number = 1, limit: number = 1000) {
   const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+  if (!apiKey) {
+    throw new Error('Helius API key is not configured. Set NEXT_PUBLIC_HELIUS_API_KEY.');
+  }
   const url = `https://mainnet.helius-rpc.com/?api-key=${apiKey}`;
 
   const response = await fetch(url, {
@@ -62,7 +69,18 @@ async function fetchNonFungibleAssetsByOwner(address: string, page: number = 1, 
     throw new Error(`Error fetching NFTs from Helius: ${errorText}`);
   }
 
-  return (await response.json()) as HeliusNFTResponse;
+  const data = (await response.json()) as HeliusNFTResponse;
+
+  // Helius returns rate-limit / quota errors inside a 200 OK JSON-RPC body, so
+  // surface them explicitly instead of letting `result` be undefined downstream.
+  if (data.error) {
+    if (data.error.code === -32429 || /max usage|rate limit/i.test(data.error.message)) {
+      throw new Error('Helius API quota exceeded. The RPC key has hit its usage limit.');
+    }
+    throw new Error(`Helius error: ${data.error.message}`);
+  }
+
+  return data;
 }
 
 export async function GET(req: NextRequest) {
@@ -79,7 +97,7 @@ export async function GET(req: NextRequest) {
   try {
     const data = await fetchNonFungibleAssetsByOwner(address);
 
-    const nfts: NFT[] = data.result.items.map((item) => ({
+    const nfts: NFT[] = (data.result?.items ?? []).map((item) => ({
       id: item.id,
       title: item.content.metadata.name || 'Untitled',
       description: item.content.metadata.description || 'No description available.',
@@ -95,6 +113,6 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     const error = err as Error;
     console.error('Error fetching NFTs:', error.message);
-    return NextResponse.json({ success: false, message: 'Server error', error: error.message }, { status: 500 });
+    return NextResponse.json({ success: false, message: error.message || 'Server error', error: error.message }, { status: 500 });
   }
 }

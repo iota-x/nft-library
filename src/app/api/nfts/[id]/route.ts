@@ -147,6 +147,9 @@ async function fetchNFTById(id: string): Promise<HeliusNFTResponse> {
   const data = (await response.json()) as HeliusNFTResponse;
 
   if (data.error) {
+    if (data.error.code === -32429 || /max usage|rate limit/i.test(data.error.message)) {
+      throw new Error('Helius API quota exceeded. The RPC key has hit its usage limit.');
+    }
     throw new Error(`Helius API Error: ${data.error.message}`);
   }
 
@@ -220,7 +223,7 @@ export async function GET(req: NextRequest) {
     const error = err as Error;
     console.error('Error fetching NFT:', error.message);
     return NextResponse.json(
-      { success: false, message: 'Server error', error: error.message },
+      { success: false, message: error.message || 'Server error', error: error.message },
       { status: 500 }
     );
   }

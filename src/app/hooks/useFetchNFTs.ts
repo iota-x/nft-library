@@ -22,11 +22,12 @@ const useFetchNFTs = (address: string) => {
 
     try {
       const response = await fetch(`/api/nfts?address=${address}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch NFTs');
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to fetch NFTs');
       }
 
-      const data = await response.json();
       setNFTs(data.nfts || []);
 
       localStorage.setItem(`nfts_${address}`, JSON.stringify(data.nfts || []));
