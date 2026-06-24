@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { ClientWalletButton } from '@/components/ClientWalletButton';
 
 const WalletButton: React.FC = () => {
   const { publicKey, connected } = useWallet();
@@ -45,7 +45,7 @@ const WalletButton: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <WalletMultiButton />
+      <ClientWalletButton />
 
       {!connected && !manualConnected && (
         <div className="flex flex-col gap-3">
