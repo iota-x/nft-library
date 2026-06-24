@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { nftImageLoader } from "@/utils/imageLoader";
 
 export interface NFT {
   id: string;
@@ -31,9 +32,6 @@ export interface NFT {
     compressed: boolean;
   };
 }
-
-const customLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) =>
-  `${src}?w=${width}&q=${quality || 75}`;
 
 const shorten = (value: string, lead = 6, tail = 6) =>
   value && value.length > lead + tail + 3
@@ -122,7 +120,7 @@ const NFTDetails: React.FC<{ nft: NFT }> = ({ nft }) => {
         <div className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-2">
           {nft.imageUrl ? (
             <Image
-              loader={customLoader}
+              loader={nftImageLoader}
               src={nft.imageUrl}
               alt={nft.title}
               width={500}

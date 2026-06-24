@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { nftImageLoader } from "@/utils/imageLoader";
 
 export interface NFTCardItem {
   title: string;
@@ -11,8 +12,6 @@ export interface NFTCardItem {
   imageUrl?: string;
   link: string;
 }
-
-const customLoader = ({ src }: { src: string }) => src;
 
 const NFTCard: React.FC<{ item: NFTCardItem; index: number }> = ({ item, index }) => {
   const [loaded, setLoaded] = useState(false);
@@ -37,7 +36,7 @@ const NFTCard: React.FC<{ item: NFTCardItem; index: number }> = ({ item, index }
                   <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/[0.04] to-white/[0.08]" />
                 )}
                 <Image
-                  loader={customLoader}
+                  loader={nftImageLoader}
                   src={item.imageUrl}
                   alt={item.title}
                   fill

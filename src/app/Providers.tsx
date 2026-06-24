@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import { RecoilRoot } from 'recoil';
 import {
   ChakraProvider,
   ColorModeScript,
@@ -33,14 +32,14 @@ const theme = extendTheme({
 
 const Providers: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <RecoilRoot>
+    <>
       <ColorModeScript initialColorMode={config.initialColorMode} />
       <ChakraProvider theme={theme}>
         <WalletProvider>
           {children}
         </WalletProvider>
       </ChakraProvider>
-    </RecoilRoot>
+    </>
   );
 };
 

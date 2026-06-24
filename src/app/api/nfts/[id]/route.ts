@@ -113,9 +113,9 @@ type Data = {
 };
 
 async function fetchNFTById(id: string): Promise<HeliusNFTResponse> {
-  const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+  const apiKey = process.env.HELIUS_API_KEY;
   if (!apiKey) {
-    throw new Error('Helius API key is not set in environment variables.');
+    throw new Error('Helius API key is not configured. Set HELIUS_API_KEY.');
   }
 
   const url = `https://mainnet.helius-rpc.com/?api-key=${apiKey}`;

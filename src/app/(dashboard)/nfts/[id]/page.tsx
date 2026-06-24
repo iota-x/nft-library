@@ -1,29 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import NFTDetails, { NFT } from "@/components/NFTDetails";
-
-const debounce = (func: Function, wait: number) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-};
-
-const throttle = (func: Function, limit: number) => {
-  let inThrottle: boolean;
-  return (...args: any[]) => {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
-  };
-};
 
 const NFTDetailPage = () => {
   const { id } = useParams();
@@ -32,40 +13,34 @@ const NFTDetailPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNFT = useCallback(
-    async (nftId: string) => {
-      try {
-        const response = await fetch(`/api/nfts/${nftId}`);
-        const data = await response.json();
+  const fetchNFT = useCallback(async (nftId: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/nfts/${nftId}`);
+      const data = await response.json();
 
-        if (data.success) {
-          setNFT(data.nft);
-        } else {
-          setError(data.message || "Failed to fetch NFT data.");
-        }
-      } catch (err) {
-        console.error("Error fetching NFT:", err);
-        setError("An error occurred while fetching the NFT.");
-      } finally {
-        setLoading(false);
+      if (data.success) {
+        setNFT(data.nft);
+      } else {
+        setError(data.message || "Failed to fetch NFT data.");
       }
-    },
-    []
-  );
-
-  const debouncedFetchNFT = useMemo(() => debounce(fetchNFT, 300), [fetchNFT]);
-
-  const throttledFetchNFT = useMemo(() => throttle(fetchNFT, 1000), [fetchNFT]);
+    } catch (err) {
+      console.error("Error fetching NFT:", err);
+      setError("An error occurred while fetching the NFT.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (id) {
-      setLoading(true);
-      throttledFetchNFT(id);
+      fetchNFT(Array.isArray(id) ? id[0] : id);
     } else {
       setError("No NFT ID provided.");
       setLoading(false);
     }
-  }, [id, debouncedFetchNFT, throttledFetchNFT]);
+  }, [id, fetchNFT]);
 
   if (loading) {
     return <LoadingSpinner />;
