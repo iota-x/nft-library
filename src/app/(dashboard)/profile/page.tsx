@@ -23,7 +23,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white">
+    <div className="min-h-screen w-full text-white">
       <div className="mx-auto w-full max-w-2xl px-6 pb-24 pt-36 sm:px-8">
         <header className="mb-10 text-center">
           <h1 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl md:text-5xl">

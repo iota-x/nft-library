@@ -41,7 +41,7 @@ const NftsPage: React.FC = () => {
   // Display message if address is invalid
   if (!shouldFetchNFTs) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-900 to-black px-6 text-center">
+      <div className="flex min-h-screen items-center justify-center px-6 text-center">
         <p className="max-w-md text-lg text-neutral-400">
           Please connect your wallet or enter a manual wallet address to see your NFTs.
         </p>
@@ -50,7 +50,7 @@ const NftsPage: React.FC = () => {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center bg-gradient-to-b from-gray-900 to-black px-6 pb-24 pt-36 sm:px-8">
+    <div className="relative flex min-h-screen flex-col items-center px-6 pb-24 pt-36 sm:px-8">
       <div className="mx-auto w-full max-w-7xl">
         <header className="mb-12 text-center">
           <span className="inline-block rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-neutral-400">

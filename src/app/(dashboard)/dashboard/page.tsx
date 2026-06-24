@@ -4,7 +4,7 @@ import WalletButton from '@/components/WalletButton';
 
 export default function Dashboard() {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white">
+    <div className="min-h-screen w-full text-white">
       <div className="mx-auto w-full max-w-6xl px-6 pb-24 pt-36 sm:px-8">
         {/* Header */}
         <header className="mb-16 text-center">

@@ -3,27 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  /* Always dark — the app is dark-themed regardless of OS preference. */
+  --foreground-rgb: 255, 255, 255;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: #05060a;
 }
 
 @layer utilities {
@@ -32,8 +18,29 @@ body {
   }
 }
 
+/* Slow drifting aurora glows for the global app background */
+@keyframes float-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(40px, 30px) scale(1.08); }
+}
+@keyframes float-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-35px, 45px) scale(1.05); }
+}
+@keyframes float-c {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(25px, -35px) scale(0.94); }
+}
+.animate-float-a { animation: float-a 16s ease-in-out infinite; }
+.animate-float-b { animation: float-b 20s ease-in-out infinite; }
+.animate-float-c { animation: float-c 18s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-a, .animate-float-b, .animate-float-c { animation: none; }
+}
+
 html, body {
-  background-color: #000; /* Set background color to black */
+  background-color: #05060a; /* Matches the global AppBackground base */
   color: #fff; /* Optional: Set default text color to white for better contrast */
   margin: 0;
   padding: 0;

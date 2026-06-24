@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/NavBar';
+import AppBackground from '@/components/AppBackground';
 import Providers from '@/app/Providers';
 import { ChakraProvider } from '@chakra-ui/react';
 
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>
+      <AppBackground />
       <Navbar />
         <ChakraProvider>
           <Providers>
