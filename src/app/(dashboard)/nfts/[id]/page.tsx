@@ -73,7 +73,7 @@ const NFTDetailPage = () => {
 
   if (error || !nft) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black px-6 text-center text-white">
+      <div className="flex min-h-screen flex-col items-center justify-center px-6 text-center text-white">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-neutral-500">
           <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
@@ -91,7 +91,7 @@ const NFTDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white">
+    <div className="min-h-screen w-full text-white">
       <div className="mx-auto w-full max-w-6xl px-6 pb-24 pt-32 sm:px-8">
         <Link
           href="/nfts"
