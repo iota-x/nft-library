@@ -1,43 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { useParams } from "next/navigation";
-import Image from 'next/image';
-import { Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { motion } from "framer-motion";
-
-export interface NFT {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  attributes: Array<{ trait_type: string; value: string }>;
-  collection: {
-    name: string;
-    address: string;
-  };
-  royalty: {
-    model: string;
-    percent: number;
-    primarySaleHappened: boolean;
-    locked: boolean;
-  };
-  owner: string;
-  mutable: boolean;
-  burnt: boolean;
-  externalUrl?: string;
-  symbol: string;
-  tokenStandard: string;
-  compression: {
-    eligible: boolean;
-    compressed: boolean;
-  };
-}
-
-const customLoader = ({ src }: { src: string }) => {
-  return src; // Modify as needed for your external source
-};
+import NFTDetails, { NFT } from "@/components/NFTDetails";
 
 const debounce = (func: Function, wait: number) => {
   let timeout: NodeJS.Timeout;
@@ -104,133 +71,40 @@ const NFTDetailPage = () => {
     return <LoadingSpinner />;
   }
 
-  if (error) {
+  if (error || !nft) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-xl text-red-500">{error}</p>
-      </div>
-    );
-  }
-
-  if (!nft) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-xl text-white">No NFT found.</p>
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-black via-gray-900 to-black px-6 text-center text-white">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-neutral-500">
+          <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <p className="mt-5 max-w-md text-sm text-neutral-400">{error || "No NFT found."}</p>
+        <Link
+          href="/nfts"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:bg-white/[0.07]"
+        >
+          Back to collection
+        </Link>
       </div>
     );
   }
 
   return (
-    <motion.div
-      className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white"
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      {/* This div pushes content down to avoid being hidden behind the navbar */}
-      <div className="pt-32">
-        {/* Responsive Layout Container */}
-        <div className="w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
-            {/* Image Section */}
-            <motion.div
-              className="flex justify-center md:justify-start"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {nft.imageUrl && (
-                <Image
-                  loader={customLoader}
-                  src={nft.imageUrl}
-                  alt={nft.title}
-                  width={500}  // You can adjust width and height based on your design
-                  height={500}
-                  className="w-full h-auto rounded-lg shadow-lg object-cover"
-                />
-              )}
-            </motion.div>
-
-            {/* Details Section */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-            >
-              <Card className="mb-4">
-                <CardTitle>{nft.title}</CardTitle>
-                <CardDescription>{nft.description}</CardDescription>
-
-                {/* Attributes Section */}
-                <CardTitle className="mt-6">Attributes</CardTitle>
-                {nft.attributes.length > 0 ? (
-                  <ul className="list-disc list-inside pl-5">
-                    {nft.attributes.map((attr, index) => (
-                      <li key={index} className="text-zinc-100">
-                        <span className="font-medium">{attr.trait_type}:</span> {attr.value}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <CardDescription>No attributes available.</CardDescription>
-                )}
-
-                {/* Collection Information */}
-                <CardTitle className="mt-6">Collection</CardTitle>
-                <CardDescription>
-                  <span className="font-medium text-zinc-100">Name:</span> {nft.collection.name}
-                  <br />
-                  <span className="font-medium text-zinc-100">Address:</span> {nft.collection.address}
-                </CardDescription>
-
-                {/* Royalty Information */}
-                <CardTitle className="mt-6">Royalty Information</CardTitle>
-                <CardDescription>
-                  <span className="font-medium text-zinc-100">Model:</span> {nft.royalty.model}
-                  <br />
-                  <span className="font-medium text-zinc-100">Percent:</span> {nft.royalty.percent}%
-                  <br />
-                  <span className="font-medium text-zinc-100">Primary Sale Happened:</span> {nft.royalty.primarySaleHappened ? "Yes" : "No"}
-                  <br />
-                  <span className="font-medium text-zinc-100">Locked:</span> {nft.royalty.locked ? "Yes" : "No"}
-                </CardDescription>
-
-                {/* Ownership Information */}
-                <CardTitle className="mt-6">Ownership</CardTitle>
-                <CardDescription>
-                  <span className="font-medium text-zinc-100">Owner Address:</span> {nft.owner}
-                  <br />
-                  <span className="font-medium text-zinc-100">Mutable:</span> {nft.mutable ? "Yes" : "No"}
-                  <br />
-                  <span className="font-medium text-zinc-100">Burnt:</span> {nft.burnt ? "Yes" : "No"}
-                </CardDescription>
-
-                {/* Additional Information */}
-                <CardTitle className="mt-6">Additional Information</CardTitle>
-                <CardDescription>
-                  <span className="font-medium text-zinc-100">Symbol:</span> {nft.symbol}
-                  <br />
-                  <span className="font-medium text-zinc-100">Token Standard:</span> {nft.tokenStandard}
-                  <br />
-                  <span className="font-medium text-zinc-100">Compression Eligible:</span> {nft.compression.eligible ? "Yes" : "No"}
-                  <br />
-                  <span className="font-medium text-zinc-100">Compressed:</span> {nft.compression.compressed ? "Yes" : "No"}
-                  {nft.externalUrl && (
-                    <>
-                      <br />
-                      <span className="font-medium text-zinc-100">External URL:</span>{" "}
-                      <a href={nft.externalUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                        {nft.externalUrl}
-                      </a>
-                    </>
-                  )}
-                </CardDescription>
-              </Card>
-            </motion.div>
-          </div>
-        </div>
+    <div className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white">
+      <div className="mx-auto w-full max-w-6xl px-6 pb-24 pt-32 sm:px-8">
+        <Link
+          href="/nfts"
+          className="mb-10 inline-flex items-center gap-2 text-sm font-medium text-neutral-400 transition hover:text-white"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Back to collection
+        </Link>
+        <NFTDetails nft={nft} />
       </div>
-    </motion.div>
+    </div>
   );
 };
 

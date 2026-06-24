@@ -2,50 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Card, CardTitle, CardDescription } from '@/components/ui/card-hover-effect';
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { Button, Input, Text } from "@chakra-ui/react";
-import Image from 'next/image';
-
-export interface NFT {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  attributes: Array<{ trait_type: string; value: string }>;
-  collection: {
-    name: string;
-    address: string;
-  };
-  royalty: {
-    model: string;
-    percent: number;
-    primarySaleHappened: boolean;
-    locked: boolean;
-  };
-  owner: string;
-  mutable: boolean;
-  burnt: boolean;
-  externalUrl?: string;
-  symbol: string;
-  tokenStandard: string;
-  compression: {
-    eligible: boolean;
-    compressed: boolean;
-  };
-}
-
-// Custom loader for Next.js image optimization
-const customLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
-  return `${src}?w=${width}&q=${quality || 75}`;
-};
+import NFTDetails, { NFT } from "@/components/NFTDetails";
 
 const SearchNFTPage = () => {
-  const [nftId, setNftId] = useState<string>('');
+  const [nftId, setNftId] = useState<string>("");
   const [manualAddress, setManualAddress] = useState<string | null>(null);
   const [nft, setNFT] = useState<NFT | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const handleSearch = useCallback(async () => {
     const idToSearch = nftId || manualAddress;
@@ -57,6 +23,7 @@ const SearchNFTPage = () => {
 
     setLoading(true);
     setError(null);
+    setHasSearched(true);
 
     try {
       const response = await fetch(`/api/nfts/${idToSearch}`);
@@ -64,12 +31,14 @@ const SearchNFTPage = () => {
 
       if (data.success) {
         setNFT(data.nft);
-        if (!manualAddress) setNftId('');
+        if (!manualAddress) setNftId("");
       } else {
+        setNFT(null);
         setError(data.message || "Failed to fetch NFT data.");
       }
     } catch (err) {
       console.error("Error fetching NFT:", err);
+      setNFT(null);
       setError(err instanceof Error ? err.message : "An unknown error occurred.");
     } finally {
       setLoading(false);
@@ -78,7 +47,7 @@ const SearchNFTPage = () => {
 
   // Detect manual wallet on mount
   useEffect(() => {
-    const storedManualAddress = localStorage.getItem('manualWalletAddress');
+    const storedManualAddress = localStorage.getItem("manualWalletAddress");
     if (storedManualAddress) {
       setManualAddress(storedManualAddress);
       setNftId(storedManualAddress);
@@ -93,156 +62,88 @@ const SearchNFTPage = () => {
   }, [manualAddress, handleSearch]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white px-6 pb-24 pt-36 sm:px-8">
-      <div className="mx-auto w-full max-w-7xl">
+    <div className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white">
+      <div className="mx-auto w-full max-w-6xl px-6 pb-24 pt-36 sm:px-8">
         {/* Header */}
         <header className="mb-10 text-center">
-          <h1 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl md:text-5xl">
+          <span className="inline-block rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-neutral-400">
+            Explorer
+          </span>
+          <h1 className="mt-6 bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
             Browse NFTs
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-base text-neutral-400">
-            Look up any NFT on Solana by its ID or a wallet address.
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-neutral-400">
+            Look up any NFT on Solana by its mint ID or a wallet address.
           </p>
         </header>
 
-        {/* Search UI */}
-        <div className="mx-auto flex w-full max-w-xl flex-col gap-4 sm:flex-row">
-          <Input
-            placeholder="Enter NFT ID or wallet address"
-            value={nftId}
-            onChange={(e) => setNftId(e.target.value)}
-            bg="blackAlpha.500"
-            borderColor="whiteAlpha.200"
-            color="white"
-            _hover={{ borderColor: "whiteAlpha.300" }}
-            _focus={{ borderColor: "blue.400", boxShadow: "0 0 0 1px var(--chakra-colors-blue-400)" }}
-            _placeholder={{ color: "gray.500" }}
-            size="lg"
-            flex="1"
-          />
-          <Button
+        {/* Search bar */}
+        <div className="mx-auto flex w-full max-w-2xl items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-2 shadow-2xl shadow-black/40 focus-within:border-sky-500/40">
+          <div className="flex flex-1 items-center gap-3 pl-3">
+            <svg className="h-5 w-5 shrink-0 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input
+              type="text"
+              value={nftId}
+              onChange={(e) => setNftId(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="Enter NFT mint ID or wallet address"
+              className="w-full bg-transparent py-3 text-sm text-white placeholder:text-neutral-500 outline-none"
+            />
+          </div>
+          <button
             onClick={handleSearch}
-            colorScheme="blue"
-            size="lg"
-            variant="solid"
-            px={8}
+            disabled={loading}
+            className="shrink-0 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            View NFT
-          </Button>
+            {loading ? "Searching…" : "Search"}
+          </button>
         </div>
 
         {/* Loading */}
-        {loading && <LoadingSpinner />}
+        {loading && (
+          <div className="mt-16">
+            <LoadingSpinner />
+          </div>
+        )}
 
-        {/* Error Message */}
-        {error && (
+        {/* Error */}
+        {error && !loading && (
           <motion.div
-            className="mt-10 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            className="mx-auto mt-10 max-w-2xl"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
           >
-            <Text fontSize="lg" color="red.400" className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3">
+            <div className="flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
               {error}
-            </Text>
+            </div>
           </motion.div>
         )}
 
-        {/* NFT Display */}
+        {/* Empty / initial state */}
+        {!loading && !error && !nft && (
+          <div className="mt-16 flex flex-col items-center text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-neutral-500">
+              <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 4.5v15a1.5 1.5 0 001.5 1.5z" />
+              </svg>
+            </div>
+            <p className="mt-5 text-sm text-neutral-500">
+              {hasSearched ? "No NFT found. Try a different ID or address." : "Search for an NFT to see its details here."}
+            </p>
+          </div>
+        )}
+
+        {/* NFT detail */}
         {nft && !loading && (
-          <motion.div
-            className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:gap-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-          {/* Image */}
-          <div className="flex justify-center md:justify-start">
-            {nft.imageUrl && (
-              <Image
-                loader={customLoader}
-                src={nft.imageUrl}
-                alt={nft.title}
-                width={500}
-                height={500}
-                className="rounded-lg shadow-lg object-cover"
-              />
-            )}
+          <div className="mt-14">
+            <NFTDetails nft={nft} />
           </div>
-
-          {/* Details */}
-          <div>
-            <Card className="mb-4">
-              <CardTitle>{nft.title}</CardTitle>
-              <CardDescription>{nft.description}</CardDescription>
-
-              {/* Attributes */}
-              <CardTitle className="mt-6">Attributes</CardTitle>
-              {nft.attributes.length > 0 ? (
-                <ul className="list-disc list-inside pl-5">
-                  {nft.attributes.map((attr, index) => (
-                    <li key={index} className="text-zinc-100">
-                      <span className="font-medium">{attr.trait_type}:</span> {attr.value}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <CardDescription>No attributes available.</CardDescription>
-              )}
-
-              {/* Collection */}
-              <CardTitle className="mt-6">Collection</CardTitle>
-              <CardDescription>
-                <span className="font-medium text-zinc-100">Name:</span> {nft.collection.name}
-                <br />
-                <span className="font-medium text-zinc-100">Address:</span> {nft.collection.address}
-              </CardDescription>
-
-              {/* Royalty */}
-              <CardTitle className="mt-6">Royalty Information</CardTitle>
-              <CardDescription>
-                <span className="font-medium text-zinc-100">Model:</span> {nft.royalty.model}
-                <br />
-                <span className="font-medium text-zinc-100">Percent:</span> {nft.royalty.percent}%
-                <br />
-                <span className="font-medium text-zinc-100">Primary Sale Happened:</span> {nft.royalty.primarySaleHappened ? "Yes" : "No"}
-                <br />
-                <span className="font-medium text-zinc-100">Locked:</span> {nft.royalty.locked ? "Yes" : "No"}
-              </CardDescription>
-
-              {/* Ownership */}
-              <CardTitle className="mt-6">Ownership</CardTitle>
-              <CardDescription>
-                <span className="font-medium text-zinc-100">Owner Address:</span> {nft.owner}
-                <br />
-                <span className="font-medium text-zinc-100">Mutable:</span> {nft.mutable ? "Yes" : "No"}
-                <br />
-                <span className="font-medium text-zinc-100">Burnt:</span> {nft.burnt ? "Yes" : "No"}
-              </CardDescription>
-
-              {/* Extra */}
-              <CardTitle className="mt-6">Additional Information</CardTitle>
-              <CardDescription>
-                <span className="font-medium text-zinc-100">Symbol:</span> {nft.symbol}
-                <br />
-                <span className="font-medium text-zinc-100">Token Standard:</span> {nft.tokenStandard}
-                <br />
-                <span className="font-medium text-zinc-100">Compression Eligible:</span> {nft.compression.eligible ? "Yes" : "No"}
-                <br />
-                <span className="font-medium text-zinc-100">Compressed:</span> {nft.compression.compressed ? "Yes" : "No"}
-                {nft.externalUrl && (
-                  <>
-                    <br />
-                    <span className="font-medium text-zinc-100">External URL:</span>{" "}
-                    <a href={nft.externalUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                      {nft.externalUrl}
-                    </a>
-                  </>
-                )}
-              </CardDescription>
-            </Card>
-          </div>
-        </motion.div>
         )}
       </div>
     </div>
