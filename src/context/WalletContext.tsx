@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo, useCallback } from "react";
+import React, { createContext, useContext, ReactNode, useMemo, useCallback, useEffect } from "react";
 import {
   ConnectionProvider,
   WalletProvider as SWAWalletProvider,
@@ -48,6 +48,14 @@ const WalletContextProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       console.warn("Wallet disconnect failed:", err);
     }
   }, [disconnect]);
+
+  // A real wallet takes precedence over a manually-entered address. Once one
+  // connects, drop any stored manual address so the two can't conflict.
+  useEffect(() => {
+    if (connected) {
+      localStorage.removeItem("manualWalletAddress");
+    }
+  }, [connected]);
 
   return (
     <WalletContext.Provider

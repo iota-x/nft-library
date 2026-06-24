@@ -1,23 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import NFTDetails, { NFT } from "@/components/NFTDetails";
 
 const SearchNFTPage = () => {
   const [nftId, setNftId] = useState<string>("");
-  const [manualAddress, setManualAddress] = useState<string | null>(null);
   const [nft, setNFT] = useState<NFT | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   const handleSearch = useCallback(async () => {
-    const idToSearch = nftId || manualAddress;
+    const idToSearch = nftId.trim();
 
     if (!idToSearch) {
-      setError("Please enter a valid NFT ID or wallet address.");
+      setError("Please enter an NFT asset ID to search.");
       return;
     }
 
@@ -31,7 +30,6 @@ const SearchNFTPage = () => {
 
       if (data.success) {
         setNFT(data.nft);
-        if (!manualAddress) setNftId("");
       } else {
         setNFT(null);
         setError(data.message || "Failed to fetch NFT data.");
@@ -43,23 +41,7 @@ const SearchNFTPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [nftId, manualAddress]);
-
-  // Detect manual wallet on mount
-  useEffect(() => {
-    const storedManualAddress = localStorage.getItem("manualWalletAddress");
-    if (storedManualAddress) {
-      setManualAddress(storedManualAddress);
-      setNftId(storedManualAddress);
-    }
-  }, []);
-
-  // Trigger search when manual address is loaded
-  useEffect(() => {
-    if (manualAddress) {
-      handleSearch();
-    }
-  }, [manualAddress, handleSearch]);
+  }, [nftId]);
 
   return (
     <div className="min-h-screen w-full text-white">
@@ -73,7 +55,7 @@ const SearchNFTPage = () => {
             Browse NFTs
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-neutral-400">
-            Look up any NFT on Solana by its mint ID or a wallet address.
+            Look up a specific NFT on Solana by its asset (mint) ID.
           </p>
         </header>
 
@@ -88,7 +70,7 @@ const SearchNFTPage = () => {
               value={nftId}
               onChange={(e) => setNftId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Enter NFT mint ID or wallet address"
+              placeholder="Enter NFT asset (mint) ID"
               className="w-full bg-transparent py-3 text-sm text-white placeholder:text-neutral-500 outline-none"
             />
           </div>
