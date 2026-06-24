@@ -5,7 +5,6 @@ import './globals.css';
 import Navbar from '@/components/NavBar';
 import AppBackground from '@/components/AppBackground';
 import Providers from '@/app/Providers';
-import { ChakraProvider } from '@chakra-ui/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,15 +23,13 @@ export default function RootLayout({
       <body className={inter.className}>
       <AppBackground />
       <Navbar />
-        <ChakraProvider>
-          <Providers>
-            <div className="flex flex-col min-h-screen">
-              <main className="flex-grow">
-                {children}
-              </main>
-            </div>
-          </Providers>
-        </ChakraProvider>
+        <Providers>
+          <div className="flex flex-col min-h-screen">
+            <main className="flex-grow">
+              {children}
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
