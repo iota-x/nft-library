@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { useWalletContext } from '@/context/WalletContext';
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { ClientWalletButton } from '@/components/ClientWalletButton';
 
 const ProfilePage: React.FC = () => {
   const { publicKey, connected } = useWalletContext();
@@ -55,7 +55,7 @@ const ProfilePage: React.FC = () => {
             </span>
           </div>
 
-          <WalletMultiButton />
+          <ClientWalletButton />
 
           {activeAddress ? (
             <div className="mt-6 rounded-lg border border-white/10 bg-black/40 px-4 py-3">
