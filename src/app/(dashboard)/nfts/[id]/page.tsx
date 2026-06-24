@@ -35,7 +35,6 @@ export interface NFT {
   };
 }
 
-// Custom image loader function
 const customLoader = ({ src }: { src: string }) => {
   return src; // Modify as needed for your external source
 };

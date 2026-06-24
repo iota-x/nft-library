@@ -20,7 +20,7 @@ interface NFT {
 }
 
 const NftsPage: React.FC = () => {
-  const { wallets } = useWalletContext();
+  const { publicKey } = useWalletContext();
   const [manualAddress, setManualAddress] = useState<string | null>(null);
 
   // Fetch manual wallet address from local storage
@@ -31,9 +31,8 @@ const NftsPage: React.FC = () => {
     }
   }, []);
 
-  // Find the connected wallet or use manual address if available
-  const connectedWallet = wallets.find(wallet => wallet.isConnected);
-  const address = connectedWallet?.publicKey?.toString() || manualAddress || '';
+  // Use the connected wallet, falling back to a manually-entered address
+  const address = publicKey || manualAddress || '';
 
   // Add a check here to prevent API call if the address is invalid
   const shouldFetchNFTs = address && address !== 'null';
@@ -43,33 +42,51 @@ const NftsPage: React.FC = () => {
   // Display message if address is invalid
   if (!shouldFetchNFTs) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Please connect your wallet or enter a manual wallet address to see your NFTs.</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-gray-900 to-black px-6 text-center">
+        <p className="max-w-md text-lg text-neutral-400">
+          Please connect your wallet or enter a manual wallet address to see your NFTs.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen p-4 bg-gradient-to-b from-gray-900 to-black pt-[140px]">
-      <h1 className="text-5xl font-bold mb-7 text-white">NFTs owned by the connected address</h1>
-      {loading && <LoadingSpinner />}
-      {error && <p className="text-red-500">{error}</p>}
-      {nfts.length > 0 ? (
-        <HoverEffect
-          items={nfts.map((nft: NFT) => ({
-            title: nft.title,
-            description: nft.description || 'No description available',
-            imageUrl: nft.imageUrl,
-            link: `/nfts/${nft.id}`,
-          }))}
-          className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        />
-      ) : (
-        !loading && <p className="text-white">No NFTs found.</p>
-      )}
+    <div className="relative flex min-h-screen flex-col items-center bg-gradient-to-b from-gray-900 to-black px-6 pb-24 pt-36 sm:px-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <header className="mb-10 text-center">
+          <h1 className="bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl md:text-5xl">
+            Your NFT Collection
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl break-all text-sm text-neutral-500">
+            Owned by {address}
+          </p>
+        </header>
+
+        {loading && <LoadingSpinner />}
+        {error && (
+          <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-red-400">
+            {error}
+          </p>
+        )}
+        {nfts.length > 0 ? (
+          <HoverEffect
+            items={nfts.map((nft: NFT) => ({
+              title: nft.title,
+              description: nft.description || 'No description available',
+              imageUrl: nft.imageUrl,
+              link: `/nfts/${nft.id}`,
+            }))}
+            className="grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          />
+        ) : (
+          !loading && (
+            <p className="mt-10 text-center text-neutral-400">No NFTs found for this address.</p>
+          )
+        )}
+        <div className="mt-10 flex justify-center">
       <button
         onClick={refetch}
-        className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block mt-6"
+        className="bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block"
       >
         <span className="absolute inset-0 overflow-hidden rounded-full">
           <span className="absolute inset-0 rounded-full bg-[image:radial-gradient(75%_100%_at_50%_0%,rgba(56,189,248,0.6)_0%,rgba(56,189,248,0)_75%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -94,6 +111,8 @@ const NftsPage: React.FC = () => {
         </div>
         <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40" />
       </button>
+        </div>
+      </div>
     </div>
   );
 };
