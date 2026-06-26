@@ -11,7 +11,10 @@ const RPC_BASE = 'https://mainnet.helius-rpc.com';
 const ENHANCED_BASE = 'https://api.helius.xyz/v0';
 
 function apiKey(): string {
-  const key = process.env.HELIUS_API_KEY;
+  // Prefer the server-only var. Fall back to the NEXT_PUBLIC_ name some
+  // deployments use — it still works, but a key with that prefix can be inlined
+  // into client bundles, so HELIUS_API_KEY (no prefix) is recommended.
+  const key = process.env.HELIUS_API_KEY ?? process.env.NEXT_PUBLIC_HELIUS_API_KEY;
   if (!key) {
     throw new Error('Helius API key is not configured. Set HELIUS_API_KEY.');
   }

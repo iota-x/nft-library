@@ -21,6 +21,7 @@ export default function Navbar({ className }: { className?: string }) {
                 
                 <div className="flex flex-col space-y-4 text-sm">
                     <HoveredLink href="/nfts">Owned NFTs</HoveredLink>
+                    <HoveredLink href="/collections">Collections</HoveredLink>
                     <HoveredLink href="/viewNFT">Browse NFT</HoveredLink>
                 </div>
                 </MenuItem>

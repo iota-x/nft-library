@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { nftImageLoader } from "@/utils/imageLoader";
 import NFTActivity from "@/components/NFTActivity";
+import NFTMarket from "@/components/NFTMarket";
 
 export interface NFT {
   id: string;
@@ -227,6 +228,9 @@ const NFTDetails: React.FC<{ nft: NFT }> = ({ nft }) => {
             <InfoRow label="Compression eligible">{nft.compression.eligible ? "Yes" : "No"}</InfoRow>
           </dl>
         </section>
+
+        {/* Marketplace floor / listing */}
+        <NFTMarket id={nft.id} />
 
         {/* On-chain provenance */}
         <NFTActivity id={nft.id} />

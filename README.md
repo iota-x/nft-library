@@ -17,10 +17,14 @@ or paste any address to browse, analyse and dig into the on-chain history of NFT
   costs no extra RPC quota.
 - **NFT detail** — full metadata: attributes, royalties, owner, token standard,
   mutability and compression status.
+- **Floor & market data** — each NFT detail shows its collection floor price,
+  listed count, all-time volume, and whether that specific NFT is currently
+  listed (via the Magic Eden API).
 - **On-chain provenance** — a per-NFT activity timeline (sales, listings, bids,
   transfers, mints) parsed from the Helius Enhanced Transactions API, each row
   linking to Solscan.
-- **Collection explorer** — click any collection to browse its items, with the
+- **Collection explorer** — a Collections page rolling your wallet up by
+  collection, plus per-collection pages to browse every item with the
   collection's own artwork, description and website.
 
 ## API routes
@@ -30,10 +34,12 @@ or paste any address to browse, analyse and dig into the on-chain history of NFT
 | `GET /api/nfts?address=` | `getAssetsByOwner` | NFTs owned by a wallet |
 | `GET /api/nfts/[id]` | `getAsset` | Full detail for one NFT |
 | `GET /api/nfts/[id]/activity` | Enhanced Transactions | On-chain activity feed |
+| `GET /api/nfts/[id]/market` | Magic Eden | Floor price + listing status |
 | `GET /api/collections/[address]` | `getAssetsByGroup` | Items in a collection |
 
-Shared request plumbing and error/quota handling live in `src/lib/helius.ts`;
-DAS-asset → view-model mapping lives in `src/lib/nft.ts`.
+Shared request plumbing and error/quota handling live in `src/lib/helius.ts`
+(Helius) and `src/lib/magiceden.ts` (Magic Eden); DAS-asset → view-model
+mapping lives in `src/lib/nft.ts`.
 
 ## Getting started
 
