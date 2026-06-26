@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import { nftImageLoader } from "@/utils/imageLoader";
+import NFTActivity from "@/components/NFTActivity";
 
 export interface NFT {
   id: string;
@@ -188,7 +190,21 @@ const NFTDetails: React.FC<{ nft: NFT }> = ({ nft }) => {
             <InfoRow label="Owner">
               <Copyable value={nft.owner} mono />
             </InfoRow>
-            <InfoRow label="Collection">{nft.collection.name || "—"}</InfoRow>
+            <InfoRow label="Collection">
+              {nft.collection.address ? (
+                <Link
+                  href={`/collections/${nft.collection.address}`}
+                  className="inline-flex items-center gap-1 text-sky-300 transition hover:text-sky-200"
+                >
+                  {nft.collection.name || "View collection"}
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.75 8.75L14.25 12l-3.5 3.25" />
+                  </svg>
+                </Link>
+              ) : (
+                nft.collection.name || "—"
+              )}
+            </InfoRow>
             {nft.collection.address && (
               <InfoRow label="Collection address">
                 <Copyable value={nft.collection.address} mono />
@@ -211,6 +227,9 @@ const NFTDetails: React.FC<{ nft: NFT }> = ({ nft }) => {
             <InfoRow label="Compression eligible">{nft.compression.eligible ? "Yes" : "No"}</InfoRow>
           </dl>
         </section>
+
+        {/* On-chain provenance */}
+        <NFTActivity id={nft.id} />
       </div>
     </motion.div>
   );

@@ -1,39 +1,63 @@
+# NFT Gallery
 
-Live link : https://nft-gallery-j2bz.vercel.app/
+A Solana NFT explorer built on [Next.js](https://nextjs.org/) and the
+[Helius DAS API](https://docs.helius.dev/). Connect a wallet (Phantom, Backpack)
+or paste any address to browse, analyse and dig into the on-chain history of NFTs.
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+**Live:** https://nft-gallery-j2bz.vercel.app/
 
-## Getting Started
+## Features
 
-First, run the development server:
+- **Your collection** — every NFT owned by a wallet, paginated server-side so
+  large wallets aren't truncated.
+- **Portfolio analytics** — totals, distinct collections, standard vs. compressed
+  breakdown, and a ranked "top collections" bar chart.
+- **Search, filter, sort & group** — find NFTs by name, filter by collection,
+  sort alphabetically, or group the grid by collection. All client-side, so it
+  costs no extra RPC quota.
+- **NFT detail** — full metadata: attributes, royalties, owner, token standard,
+  mutability and compression status.
+- **On-chain provenance** — a per-NFT activity timeline (sales, listings, bids,
+  transfers, mints) parsed from the Helius Enhanced Transactions API, each row
+  linking to Solscan.
+- **Collection explorer** — click any collection to browse its items, with the
+  collection's own artwork, description and website.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## API routes
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Route | Helius method | Purpose |
+| --- | --- | --- |
+| `GET /api/nfts?address=` | `getAssetsByOwner` | NFTs owned by a wallet |
+| `GET /api/nfts/[id]` | `getAsset` | Full detail for one NFT |
+| `GET /api/nfts/[id]/activity` | Enhanced Transactions | On-chain activity feed |
+| `GET /api/collections/[address]` | `getAssetsByGroup` | Items in a collection |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Shared request plumbing and error/quota handling live in `src/lib/helius.ts`;
+DAS-asset → view-model mapping lives in `src/lib/nft.ts`.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Getting started
 
-## Learn More
+1. Copy the env template and add a Helius RPC key (free at
+   [dashboard.helius.dev](https://dashboard.helius.dev)):
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   cp .env.example .env.local
+   # then set HELIUS_API_KEY in .env.local
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. Install and run the dev server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+   ```bash
+   npm install
+   npm run dev
+   ```
 
-## Deploy on Vercel
+3. Open [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`HELIUS_API_KEY` is server-only (no `NEXT_PUBLIC_` prefix) so the key is never
+shipped to the browser; all Helius calls go through the API routes above.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Deploy
+
+Deploy on [Vercel](https://vercel.com/new); set `HELIUS_API_KEY` in the project's
+environment variables.

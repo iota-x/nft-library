@@ -7,6 +7,9 @@ interface NFT {
   description: string;
   imageUrl: string;
   attributes?: Array<{ trait_type: string; value: string }>;
+  collection: { name: string; address: string; image?: string } | null;
+  compressed: boolean;
+  tokenStandard: string | null;
 }
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
