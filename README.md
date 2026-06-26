@@ -8,6 +8,9 @@ or paste any address to browse, analyse and dig into the on-chain history of NFT
 
 ## Features
 
+- **Explore trending** — a live board of the hottest Solana collections (ranked
+  by Magic Eden, with 1H/24H/7D/30D ranges), drilling into a collection's stats
+  and current listings, each listing linking through to full NFT detail.
 - **Your collection** — every NFT owned by a wallet, paginated server-side so
   large wallets aren't truncated.
 - **Portfolio analytics** — totals, distinct collections, standard vs. compressed
@@ -36,6 +39,8 @@ or paste any address to browse, analyse and dig into the on-chain history of NFT
 | `GET /api/nfts/[id]/activity` | Enhanced Transactions | On-chain activity feed |
 | `GET /api/nfts/[id]/market` | Magic Eden | Floor price + listing status |
 | `GET /api/collections/[address]` | `getAssetsByGroup` | Items in a collection |
+| `GET /api/explore` | Magic Eden | Trending collections |
+| `GET /api/explore/[symbol]` | Magic Eden | Collection stats + listings |
 
 Shared request plumbing and error/quota handling live in `src/lib/helius.ts`
 (Helius) and `src/lib/magiceden.ts` (Magic Eden); DAS-asset → view-model

@@ -111,6 +111,8 @@ const InfoRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label
 /* ------------------------------- main component ----------------------------- */
 
 const NFTDetails: React.FC<{ nft: NFT }> = ({ nft }) => {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <motion.div
       className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:gap-12"
@@ -121,18 +123,22 @@ const NFTDetails: React.FC<{ nft: NFT }> = ({ nft }) => {
       {/* Image */}
       <div className="lg:sticky lg:top-28 lg:self-start">
         <div className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-2">
-          {nft.imageUrl ? (
+          {nft.imageUrl && !imgError ? (
             <Image
               loader={nftImageLoader}
               src={nft.imageUrl}
               alt={nft.title}
               width={500}
               height={500}
+              onError={() => setImgError(true)}
               className="h-auto w-full rounded-xl object-cover transition duration-500 group-hover:scale-[1.02]"
             />
           ) : (
-            <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-black/40 text-neutral-600">
-              No image
+            <div className="flex aspect-square w-full flex-col items-center justify-center gap-2 rounded-xl bg-black/40 text-neutral-600">
+              <svg className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 4.5v15a1.5 1.5 0 001.5 1.5z" />
+              </svg>
+              <span className="text-xs">{imgError ? "Image unavailable" : "No image"}</span>
             </div>
           )}
         </div>

@@ -2,10 +2,9 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useWalletContext } from "@/context/WalletContext";
 import useFetchNFTs from "@/app/hooks/useFetchNFTs";
-import { nftImageLoader } from "@/utils/imageLoader";
+import NftImage from "@/components/NftImage";
 import { NFTCollectionSkeleton } from "@/components/NFTCollection";
 
 const CollectionsIndexPage: React.FC = () => {
@@ -85,22 +84,13 @@ const CollectionsIndexPage: React.FC = () => {
                 <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-br from-sky-500/40 via-indigo-500/30 to-fuchsia-500/40 opacity-0 blur transition duration-500 group-hover:opacity-100" />
                 <div className="relative flex items-center gap-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition duration-500 group-hover:-translate-y-1 group-hover:border-white/20">
                   <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
-                    {c.image ? (
-                      <Image
-                        loader={nftImageLoader}
-                        src={c.image}
-                        alt={c.name}
-                        fill
-                        sizes="64px"
-                        className="object-cover transition duration-500 group-hover:scale-110"
-                      />
-                    ) : (
-                      <span className="flex h-full w-full items-center justify-center text-neutral-600">
-                        <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 4.5v15a1.5 1.5 0 001.5 1.5z" />
-                        </svg>
-                      </span>
-                    )}
+                    <NftImage
+                      src={c.image}
+                      alt={c.name}
+                      sizes="64px"
+                      imgClassName="group-hover:scale-110"
+                      iconClassName="h-7 w-7"
+                    />
                   </span>
                   <div className="min-w-0 flex-1">
                     <h3 className="truncate font-semibold tracking-tight text-neutral-100" title={c.name}>

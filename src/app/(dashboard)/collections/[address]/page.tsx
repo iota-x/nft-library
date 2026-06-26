@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useParams } from "next/navigation";
-import { nftImageLoader } from "@/utils/imageLoader";
+import NftImage from "@/components/NftImage";
 import NFTCollection, { NFTCardItem, NFTCollectionSkeleton } from "@/components/NFTCollection";
 
 interface CollectionInfo {
@@ -88,17 +87,10 @@ const CollectionPage = () => {
         {/* Collection header */}
         <header className="mb-12 flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 sm:h-28 sm:w-28">
-            {info?.image ? (
-              <Image
-                loader={nftImageLoader}
-                src={info.image}
-                alt={info.name}
-                fill
-                sizes="112px"
-                className="object-cover"
-              />
-            ) : (
+            {loading && !info ? (
               <div className="h-full w-full animate-pulse bg-white/[0.05]" />
+            ) : (
+              <NftImage src={info?.image} alt={info?.name ?? "Collection"} sizes="112px" iconClassName="h-9 w-9" />
             )}
           </div>
           <div className="min-w-0">

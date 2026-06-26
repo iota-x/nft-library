@@ -1,10 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { nftImageLoader } from "@/utils/imageLoader";
+import NftImage from "@/components/NftImage";
 
 export interface NFTCardItem {
   title: string;
@@ -14,8 +12,6 @@ export interface NFTCardItem {
 }
 
 const NFTCard: React.FC<{ item: NFTCardItem; index: number }> = ({ item, index }) => {
-  const [loaded, setLoaded] = useState(false);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -30,30 +26,12 @@ const NFTCard: React.FC<{ item: NFTCardItem; index: number }> = ({ item, index }
         <div className="relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] transition duration-500 group-hover:-translate-y-1.5 group-hover:border-white/20 group-hover:shadow-2xl group-hover:shadow-sky-500/10">
           {/* Image */}
           <div className="relative aspect-square w-full overflow-hidden bg-black/40">
-            {item.imageUrl ? (
-              <>
-                {!loaded && (
-                  <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/[0.04] to-white/[0.08]" />
-                )}
-                <Image
-                  loader={nftImageLoader}
-                  src={item.imageUrl}
-                  alt={item.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  onLoad={() => setLoaded(true)}
-                  className={`object-cover transition-all duration-700 ease-out group-hover:scale-110 ${
-                    loaded ? "opacity-100 blur-0" : "opacity-0 blur-md"
-                  }`}
-                />
-              </>
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-neutral-600">
-                <svg className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 4.5v15a1.5 1.5 0 001.5 1.5z" />
-                </svg>
-              </div>
-            )}
+            <NftImage
+              src={item.imageUrl}
+              alt={item.title}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              imgClassName="group-hover:scale-110"
+            />
 
             {/* Bottom gradient for legibility */}
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent opacity-80" />

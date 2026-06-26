@@ -2,8 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { nftImageLoader } from "@/utils/imageLoader";
+import NftImage from "@/components/NftImage";
 
 interface NFTLike {
   collection: { name: string; address: string; image?: string } | null;
@@ -72,16 +71,7 @@ const PortfolioStats: React.FC<{ nfts: NFTLike[] }> = ({ nfts }) => {
                     className="group flex items-center gap-3"
                   >
                     <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-black/40">
-                      {c.image ? (
-                        <Image
-                          loader={nftImageLoader}
-                          src={c.image}
-                          alt={c.name}
-                          fill
-                          sizes="36px"
-                          className="object-cover"
-                        />
-                      ) : null}
+                      <NftImage src={c.image} alt={c.name} sizes="36px" iconClassName="h-4 w-4" />
                     </span>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-baseline justify-between gap-2">

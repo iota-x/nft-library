@@ -63,6 +63,135 @@ export interface MarketData {
 const toSol = (lamports: number | undefined | null): number | null =>
   typeof lamports === 'number' ? Math.round((lamports / LAMPORTS_PER_SOL) * 1000) / 1000 : null;
 
+/* --------------------------------- Explore -------------------------------- */
+
+export interface TrendingCollection {
+  symbol: string;
+  name: string;
+  image: string;
+  description: string;
+  floorPrice: number | null;
+  volumeAll: number | null;
+}
+
+interface MePopular {
+  symbol?: string;
+  name?: string;
+  image?: string;
+  description?: string;
+  floorPrice?: number;
+  volumeAll?: number;
+}
+
+/** Trending collections for a time range (Magic Eden's popularity ranking). */
+export async function getPopularCollections(
+  timeRange: '1h' | '1d' | '7d' | '30d' = '1d',
+): Promise<TrendingCollection[]> {
+  const data = await meGet<MePopular[]>(
+    `/marketplace/popular_collections?timeRange=${timeRange}&limit=50`,
+  );
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter((c) => c.symbol)
+    .map((c) => ({
+      symbol: c.symbol!,
+      name: c.name || c.symbol!,
+      image: c.image || '',
+      description: c.description || '',
+      floorPrice: toSol(c.floorPrice),
+      volumeAll: toSol(c.volumeAll),
+    }));
+}
+
+export interface CollectionListing {
+  mint: string;
+  price: number | null;
+  name: string;
+  image: string;
+  rarityRank: number | null;
+}
+
+interface MeListing {
+  tokenMint?: string;
+  price?: number;
+  rarity?: { moonrank?: { rank?: number }; howrare?: { rank?: number } };
+  token?: { name?: string; image?: string };
+}
+
+interface MeCollectionStats {
+  symbol?: string;
+  floorPrice?: number;
+  listedCount?: number;
+  volumeAll?: number;
+}
+
+export interface CollectionMarket {
+  symbol: string;
+  name: string;
+  description: string;
+  image: string;
+  floorPrice: number | null;
+  listedCount: number | null;
+  volumeAll: number | null;
+}
+
+interface MeCollection {
+  symbol?: string;
+  name?: string;
+  description?: string;
+  image?: string;
+}
+
+function settled<T>(r: PromiseSettledResult<T | null>): T | null {
+  return r.status === 'fulfilled' ? r.value : null;
+}
+
+/**
+ * Collection profile + stats for an Explore detail page, by ME symbol.
+ * Tolerates a partial failure (e.g. one endpoint rate-limited) so the page
+ * still renders with whatever data came back.
+ */
+export async function getCollectionMarket(symbol: string): Promise<CollectionMarket | null> {
+  const [profileRes, statsRes] = await Promise.allSettled([
+    meGet<MeCollection>(`/collections/${symbol}`),
+    meGet<MeCollectionStats>(`/collections/${symbol}/stats`),
+  ]);
+  const profile = settled(profileRes);
+  const stats = settled(statsRes);
+  if (!profile && !stats) return null;
+  return {
+    symbol,
+    name: profile?.name || symbol,
+    description: profile?.description || '',
+    image: profile?.image || '',
+    floorPrice: toSol(stats?.floorPrice),
+    listedCount: stats?.listedCount ?? null,
+    volumeAll: toSol(stats?.volumeAll),
+  };
+}
+
+/** Currently-listed items in a collection (cheapest first), by ME symbol. */
+export async function getCollectionListings(
+  symbol: string,
+  limit = 40,
+): Promise<CollectionListing[]> {
+  const data = await meGet<MeListing[]>(
+    `/collections/${symbol}/listings?offset=0&limit=${limit}`,
+  );
+  if (!Array.isArray(data)) return [];
+  return data
+    .filter((l) => l.tokenMint)
+    .map((l) => ({
+      mint: l.tokenMint!,
+      price: typeof l.price === 'number' ? l.price : null,
+      name: l.token?.name || 'Unnamed',
+      image: l.token?.image || '',
+      rarityRank: l.rarity?.moonrank?.rank ?? l.rarity?.howrare?.rank ?? null,
+    }));
+}
+
+/* ------------------------------- Single asset ----------------------------- */
+
 /** Resolves Magic Eden market data for a single NFT mint, or null if not indexed. */
 export async function getMarketData(mint: string): Promise<MarketData | null> {
   const token = await meGet<MeToken>(`/tokens/${mint}`);
