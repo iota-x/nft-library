@@ -1,24 +1,19 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { useWalletContext } from "@/context/WalletContext";
 import useFetchNFTs from "@/app/hooks/useFetchNFTs";
 import NftImage from "@/components/NftImage";
 import { NFTCollectionSkeleton } from "@/components/NFTCollection";
+import ConnectWalletPanel from "@/components/ConnectWalletPanel";
+import WalletStatusChip from "@/components/WalletStatusChip";
 
 const CollectionsIndexPage: React.FC = () => {
-  const { publicKey } = useWalletContext();
-  const [manualAddress, setManualAddress] = useState<string | null>(null);
+  const { address } = useWalletContext();
 
-  useEffect(() => {
-    const stored = localStorage.getItem("manualWalletAddress");
-    if (stored) setManualAddress(stored);
-  }, []);
-
-  const address = publicKey || manualAddress || "";
-  const shouldFetch = address && address !== "null";
-  const { nfts, loading, error } = useFetchNFTs(shouldFetch ? address : "");
+  const shouldFetch = Boolean(address && address !== "null");
+  const { nfts, loading, error } = useFetchNFTs(shouldFetch ? address! : "");
 
   // Roll the wallet's NFTs up into distinct collections with item counts.
   const collections = useMemo(() => {
@@ -38,10 +33,21 @@ const CollectionsIndexPage: React.FC = () => {
 
   if (!shouldFetch) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-6 text-center">
-        <p className="max-w-md text-lg text-neutral-400">
-          Connect your wallet or enter an address to see the collections you hold.
-        </p>
+      <div className="flex min-h-screen items-center justify-center px-6 py-32">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-neutral-400">
+            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-100">See your collections</h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-400">
+            Connect a wallet or paste any Solana address to see the collections it holds.
+          </p>
+          <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left">
+            <ConnectWalletPanel />
+          </div>
+        </div>
       </div>
     );
   }
@@ -56,11 +62,14 @@ const CollectionsIndexPage: React.FC = () => {
           <h1 className="mt-6 bg-gradient-to-b from-neutral-50 to-neutral-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
             Collections You Hold
           </h1>
-          {!loading && !error && (
-            <p className="mx-auto mt-5 text-sm text-neutral-400">
-              {collections.length} {collections.length === 1 ? "collection" : "collections"}
-            </p>
-          )}
+          <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-2">
+            <WalletStatusChip />
+            {!loading && !error && (
+              <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-neutral-400">
+                {collections.length} {collections.length === 1 ? "collection" : "collections"}
+              </span>
+            )}
+          </div>
         </header>
 
         {loading && <NFTCollectionSkeleton count={6} />}

@@ -1,6 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, ReactNode, useMemo, useCallback, useEffect } from "react";
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useMemo,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   ConnectionProvider,
   WalletProvider as SWAWalletProvider,
@@ -18,18 +26,49 @@ import { clusterApiUrl } from "@solana/web3.js";
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
+const MANUAL_KEY = "manualWalletAddress";
+
+/** Solana addresses are base58, 32–44 chars. */
+export const isValidSolanaAddress = (addr: string) =>
+  /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr.trim());
+
 interface WalletContextProps {
+  /** Connected wallet's address, or null. */
   publicKey: string | null;
   connected: boolean;
   connecting: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
+  /** A manually-entered address being viewed (no real connection), or null. */
+  manualAddress: string | null;
+  /** Effective address in use: connected wallet takes precedence over manual. */
+  address: string | null;
+  setManualWallet: (address: string) => void;
+  clearManualWallet: () => void;
 }
 
 const WalletContext = createContext<WalletContextProps | undefined>(undefined);
 
 const WalletContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { publicKey, connected, connecting, connect, disconnect } = useWallet();
+  const [manualAddress, setManualAddressState] = useState<string | null>(null);
+
+  // Hydrate the manual address from localStorage once on mount.
+  useEffect(() => {
+    const stored = localStorage.getItem(MANUAL_KEY);
+    if (stored) setManualAddressState(stored);
+  }, []);
+
+  const setManualWallet = useCallback((addr: string) => {
+    const trimmed = addr.trim();
+    localStorage.setItem(MANUAL_KEY, trimmed);
+    setManualAddressState(trimmed);
+  }, []);
+
+  const clearManualWallet = useCallback(() => {
+    localStorage.removeItem(MANUAL_KEY);
+    setManualAddressState(null);
+  }, []);
 
   // Wrap connect/disconnect so a user cancelling or rejecting never throws an
   // unhandled rejection that breaks the UI.
@@ -53,18 +92,25 @@ const WalletContextProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // connects, drop any stored manual address so the two can't conflict.
   useEffect(() => {
     if (connected) {
-      localStorage.removeItem("manualWalletAddress");
+      localStorage.removeItem(MANUAL_KEY);
+      setManualAddressState(null);
     }
   }, [connected]);
+
+  const pubkey = publicKey?.toBase58() || null;
 
   return (
     <WalletContext.Provider
       value={{
-        publicKey: publicKey?.toBase58() || null,
+        publicKey: pubkey,
         connected,
         connecting,
         connect: safeConnect,
         disconnect: safeDisconnect,
+        manualAddress,
+        address: pubkey || manualAddress,
+        setManualWallet,
+        clearManualWallet,
       }}
     >
       {children}

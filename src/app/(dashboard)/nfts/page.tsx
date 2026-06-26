@@ -1,10 +1,12 @@
 "use client";
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useWalletContext } from '@/context/WalletContext';
 import useFetchNFTs from '@/app/hooks/useFetchNFTs';
 import NFTCollection, { NFTCardItem, NFTCollectionSkeleton } from '@/components/NFTCollection';
 import PortfolioStats from '@/components/PortfolioStats';
+import ConnectWalletPanel from '@/components/ConnectWalletPanel';
+import WalletStatusChip from '@/components/WalletStatusChip';
 
 interface Attribute {
   trait_type: string;
@@ -27,8 +29,7 @@ type SortKey = 'default' | 'name-asc' | 'name-desc';
 const UNCATEGORIZED = '__none__';
 
 const NftsPage: React.FC = () => {
-  const { publicKey } = useWalletContext();
-  const [manualAddress, setManualAddress] = useState<string | null>(null);
+  const { address } = useWalletContext();
 
   // Filter/sort/group UI state.
   const [search, setSearch] = useState('');
@@ -36,15 +37,9 @@ const NftsPage: React.FC = () => {
   const [sort, setSort] = useState<SortKey>('default');
   const [grouped, setGrouped] = useState(false);
 
-  useEffect(() => {
-    const storedAddress = localStorage.getItem('manualWalletAddress');
-    if (storedAddress) setManualAddress(storedAddress);
-  }, []);
+  const shouldFetchNFTs = Boolean(address && address !== 'null');
 
-  const address = publicKey || manualAddress || '';
-  const shouldFetchNFTs = address && address !== 'null';
-
-  const { nfts, loading, error, refetch } = useFetchNFTs(shouldFetchNFTs ? address : '');
+  const { nfts, loading, error, refetch } = useFetchNFTs(shouldFetchNFTs ? address! : '');
 
   // Distinct collections present in the wallet, for the filter dropdown.
   const collectionOptions = useMemo(() => {
@@ -103,10 +98,21 @@ const NftsPage: React.FC = () => {
 
   if (!shouldFetchNFTs) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-6 text-center">
-        <p className="max-w-md text-lg text-neutral-400">
-          Please connect your wallet or enter a manual wallet address to see your NFTs.
-        </p>
+      <div className="flex min-h-screen items-center justify-center px-6 py-32">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-neutral-400">
+            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.4}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V4.5a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 4.5v15a1.5 1.5 0 001.5 1.5z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-100">See your NFT collection</h1>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-400">
+            Connect a wallet to view your NFTs, or paste any Solana address to browse it.
+          </p>
+          <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-left">
+            <ConnectWalletPanel />
+          </div>
+        </div>
       </div>
     );
   }
@@ -122,10 +128,7 @@ const NftsPage: React.FC = () => {
             Your NFT Collection
           </h1>
           <div className="mx-auto mt-5 flex flex-wrap items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 font-mono text-xs text-neutral-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-              {address.length > 14 ? `${address.slice(0, 6)}…${address.slice(-6)}` : address}
-            </span>
+            <WalletStatusChip />
             {!loading && !error && (
               <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs text-neutral-400">
                 {nfts.length} {nfts.length === 1 ? 'item' : 'items'}

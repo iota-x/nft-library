@@ -1,19 +1,11 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useWalletContext } from '@/context/WalletContext';
 import { ClientWalletButton } from '@/components/ClientWalletButton';
 
 const ProfilePage: React.FC = () => {
-  const { publicKey, connected } = useWalletContext();
-  const [manualAddress, setManualAddress] = useState<string | null>(null);
+  const { connected, manualAddress, address: activeAddress, clearManualWallet } = useWalletContext();
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    const stored = localStorage.getItem('manualWalletAddress');
-    if (stored) setManualAddress(stored);
-  }, []);
-
-  const activeAddress = publicKey || manualAddress;
 
   const handleCopy = async () => {
     if (!activeAddress) return;
@@ -55,7 +47,9 @@ const ProfilePage: React.FC = () => {
             </span>
           </div>
 
-          <ClientWalletButton />
+          <div className="nav-wallet">
+            <ClientWalletButton />
+          </div>
 
           {activeAddress ? (
             <div className="mt-6 rounded-lg border border-white/10 bg-black/40 px-4 py-3">
@@ -71,6 +65,14 @@ const ProfilePage: React.FC = () => {
                   {copied ? 'Copied' : 'Copy'}
                 </button>
               </div>
+              {!connected && manualAddress && (
+                <button
+                  onClick={clearManualWallet}
+                  className="mt-3 text-sm font-medium text-red-400 transition hover:text-red-300"
+                >
+                  Disconnect
+                </button>
+              )}
             </div>
           ) : (
             <p className="mt-6 text-sm text-neutral-500">
